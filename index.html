@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca Matemática & Ciencias</title>
+  <style>
+    :root {
+      --caoba-fondo: #0a0705;
+      --madera-oscura: #180f0b;
+      --madera-panel: #241610;
+      --madera-moldura: #42261b;
+      --oro-brillante: #f3d889;
+      --oro-medio: #c99f46;
+      --oro-viejo: #7a5c20;
+      --pergamino: #ecdcc1;
+      --verde-descarga: #2e7d32;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #1c120c 0%, var(--caoba-fondo) 100%);
+      color: var(--pergamino);
+      font-family: 'Cinzel', 'Palatino', 'Georgia', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 15px;
+    }
+    header { width: 100%; max-width: 1250px; text-align: center; margin-bottom: 25px; }
+    .placa-seccion {
+      display: inline-block;
+      background: radial-gradient(ellipse at center, #1b3d63 0%, #081422 100%);
+      border: 3px solid var(--oro-medio);
+      border-radius: 20px / 10px;
+      padding: 8px 36px;
+      color: #b8e0ff;
+      letter-spacing: 4px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(184, 224, 255, 0.8), 0 2px 4px #000;
+      box-shadow: 0 0 0 2px #100b07, 0 10px 25px rgba(0,0,0,0.9);
+      margin-bottom: 22px;
+    }
+    .pestanas-categorias {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      padding: 6px;
+      scrollbar-width: thin;
+    }
+    .btn-categoria {
+      background: linear-gradient(180deg, #2b1a13 0%, #150d09 100%);
+      border: 1px solid var(--oro-viejo);
+      color: var(--pergamino);
+      padding: 7px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.82rem;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-categoria:hover, .btn-categoria.activo {
+      background: linear-gradient(180deg, #442a1e 0%, #22140d 100%);
+      border-color: var(--oro-brillante);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .librero {
+      width: 100%;
+      max-width: 1250px;
+      background: #110a07;
+      border: 18px solid var(--madera-moldura);
+      border-style: ridge;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      padding: 35px 25px;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.95), 0 15px 40px rgba(0,0,0,0.9);
+    }
+    .saga-bloque { display: flex; flex-direction: column; }
+    .rotulo-saga { align-self: flex-start; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
+    .saga-adorno-izq { width: 30px; height: 2px; background: linear-gradient(90deg, transparent, var(--oro-medio)); }
+    .titulo-saga { font-size: 1.2rem; color: var(--oro-brillante); letter-spacing: 3px; text-transform: uppercase; }
+    .estante-libros {
+      display: flex;
+      align-items: flex-end;
+      gap: 22px;
+      min-height: 285px;
+      padding: 15px 25px 0 25px;
+      overflow-x: auto;
+      background: linear-gradient(180deg, rgba(5,3,2,0.85) 0%, rgba(20,12,8,0.4) 100%);
+      border-radius: 4px 4px 0 0;
+      scrollbar-width: thin;
+    }
+    .tabla-madera {
+      height: 30px;
+      background: linear-gradient(180deg, #5c3725 0%, #3a2014 45%, #180b06 100%);
+      border-top: 2px solid #825037;
+      border-bottom: 5px solid #090402;
+    }
+    .libro-portada-caja {
+      width: 150px;
+      height: 225px;
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 4px;
+      transition: transform 0.25s ease;
+    }
+    .libro-portada-caja:hover { transform: translateY(-18px) scale(1.05); }
+    .tapa-libro {
+      width: 100%;
+      height: 100%;
+      border-radius: 3px 6px 6px 3px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(243, 216, 137, 0.3);
+      background-color: #1a110a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: -4px 2px 10px rgba(0,0,0,0.8), 4px 4px 18px rgba(0,0,0,0.9);
+    }
+    .imagen-cubierta { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cubierta-decorativa {
+      width: 100%; height: 100%; padding: 16px 12px;
+      display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+      text-align: center; background: radial-gradient(circle at center, #2e1a12 0%, #120b08 100%);
+      border: 2px solid var(--oro-medio);
+    }
+    .cubierta-titulo {
+      font-size: 0.85rem; color: var(--oro-brillante); font-weight: 700;
+      display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .etiqueta-libro { margin-top: 6px; font-size: 0.72rem; color: #c4a482; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Modal Detalle */
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.88); backdrop-filter: blur(4px); z-index: 1000;
+      align-items: center; justify-content: center; padding: 15px;
+    }
+    .modal.activo { display: flex; }
+    .tarjeta-detalle {
+      background: radial-gradient(circle at top, #2b1b14 0%, #120b08 100%);
+      border: 3px solid var(--oro-medio); border-radius: 8px; width: 100%; max-width: 620px;
+      display: flex; gap: 24px; padding: 25px; position: relative;
+    }
+    .portada-preview { width: 190px; height: 270px; background: #1c140f; border: 2px solid var(--oro-viejo); border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+    .info-detalle { display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
+    .cerrar-btn { background: none; border: none; color: var(--oro-brillante); font-size: 1.6rem; cursor: pointer; }
+    .tarjeta-detalle .cerrar-btn { position: absolute; top: 12px; right: 16px; }
+
+    .acciones-detalle {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-leer {
+      background: linear-gradient(180deg, #1e395b 0%, #0d1e33 100%);
+      border: 1.5px solid var(--oro-medio); color: #cbe6ff; padding: 12px 20px;
+      font-size: 1.05rem; border-radius: 4px; cursor: pointer; font-family: inherit; width: 100%;
+      letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s;
+    }
+    .btn-leer:hover {
+      background: linear-gradient(180deg, #2a5080 0%, #132b49 100%);
+      border-color: var(--oro-brillante);
+      color: #fff;
+    }
+
+    .btn-descargar {
+      background: linear-gradient(180deg, #244b20 0%, #11260e 100%);
+      border: 1.5px solid #4caf50; color: #d4f7d5; padding: 10px 16px;
+      font-size: 0.95rem; border-radius: 4px; cursor: pointer; font-family: inherit; width: 100%;
+      letter-spacing: 1px; text-decoration: none; text-align: center; display: block;
+      transition: all 0.2s;
+    }
+    .btn-descargar:hover {
+      background: linear-gradient(180deg, #32662c 0%, #193814 100%);
+      border-color: #81c784;
+      color: #fff;
+    }
+
+    /* Visor Embebido */
+    .visor-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #080605; z-index: 2000; flex-direction: column;
+    }
+    .visor-modal.activo { display: flex; }
+    .barra-visor {
+      width: 100%; background: linear-gradient(180deg, #2e1a12 0%, #150b07 100%);
+      padding: 10px 24px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--oro-medio);
+    }
+    .iframe-contenedor {
+      flex-grow: 1; width: 100%; height: 100%; background: #0c0806;
+      position: relative;
+    }
+    #visor-iframe { width: 100%; height: 100%; border: none; }
+
+    .pantalla-carga-visor {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at center, #1a100a 0%, #080504 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; z-index: 10; transition: opacity 0.4s ease;
+    }
+    .pantalla-carga-visor.oculto { opacity: 0; pointer-events: none; }
+    .runa-spinner {
+      width: 50px; height: 50px;
+      border: 3px solid rgba(201, 159, 70, 0.2);
+      border-top-color: var(--oro-brillante);
+      border-radius: 50%;
+      animation: girarRuna 0.9s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+    }
+    @keyframes girarRuna { to { transform: rotate(360deg); } }
+    .texto-carga {
+      font-size: 1rem; color: var(--oro-brillante); letter-spacing: 2px;
+      text-transform: uppercase; text-shadow: 0 2px 4px #000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="placa-seccion" id="placa-actual">BIBLIOTECA • ARCHIVO MATEMÁTICO</div>
+    <nav class="pestanas-categorias" id="menu-categorias">
+      <button class="btn-categoria activo" data-cat="TODOS">Ver Todo</button>
+      <button class="btn-categoria" data-cat="Agricultura">Agricultura</button>
+      <button class="btn-categoria" data-cat="Algebra">Algebra</button>
+      <button class="btn-categoria" data-cat="Análisis Numérico">Análisis Numérico</button>
+      <button class="btn-categoria" data-cat="Analisis Tensorial">Analisis Tensorial</button>
+      <button class="btn-categoria" data-cat="Arduino">Arduino</button>
+      <button class="btn-categoria" data-cat="Cálculo">Cálculo</button>
+      <button class="btn-categoria" data-cat="Componentes Electronicos">Componentes Electronicos</button>
+      <button class="btn-categoria" data-cat="Computación">Computación</button>
+      <button class="btn-categoria" data-cat="Didactica">Didactica</button>
+      <button class="btn-categoria" data-cat="Discreta">Discreta</button>
+      <button class="btn-categoria" data-cat="Economía">Economía</button>
+      <button class="btn-categoria" data-cat="Estadistica">Estadistica</button>
+      <button class="btn-categoria" data-cat="Física">Física</button>
+      <button class="btn-categoria" data-cat="Física Cuantica">Física Cuantica</button>
+      <button class="btn-categoria" data-cat="Geometría">Geometría</button>
+      <button class="btn-categoria" data-cat="Guías de Juegos">Guías de Juegos</button>
+      <button class="btn-categoria" data-cat="Idiomas">Idiomas</button>
+      <button class="btn-categoria" data-cat="Lenguajes de Programación">Lenguajes de Programación</button>
+      <button class="btn-categoria" data-cat="Matemática">Matemática</button>
+      <button class="btn-categoria" data-cat="Probabilidad">Probabilidad</button>
+      <button class="btn-categoria" data-cat="Programación Lineal">Programación Lineal</button>
+      <button class="btn-categoria" data-cat="Python">Python</button>
+      <button class="btn-categoria" data-cat="Química">Química</button>
+      <button class="btn-categoria" data-cat="Random">Random</button>
+      <button class="btn-categoria" data-cat="Rol">Rol</button>
+      <button class="btn-categoria" data-cat="Tesis">Tesis</button>
+      <button class="btn-categoria" data-cat="UTN">UTN</button>
+    </nav>
+  </header>
+
+  <main class="librero" id="librero-contenedor"></main>
+
+  <!-- Modal Detalle -->
+  <div class="modal" id="modal-detalle">
+    <div class="tarjeta-detalle">
+      <button class="cerrar-btn" onclick="cerrarDetalle()">✕</button>
+      <img id="detalle-portada" class="portada-preview" src="" alt="Portada">
+      <div class="info-detalle">
+        <div>
+          <h2 id="detalle-titulo" style="color: var(--oro-brillante); margin-bottom: 6px;"></h2>
+          <p id="detalle-saga" style="color: #c4a482; font-style: italic; margin-bottom: 12px;"></p>
+          <p><strong>Autor:</strong> <span id="detalle-autor"></span></p>
+          <p><strong>Tomo:</strong> <span id="detalle-tomo"></span></p>
+        </div>
+        <div class="acciones-detalle">
+          <button class="btn-leer" id="btn-iniciar-lectura">Abrir Tomo</button>
+          <a class="btn-descargar" id="btn-descargar-libro" href="" target="_blank" download>💾 Descargar para leer offline</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visor Embebido con Pantalla de Carga -->
+  <div class="visor-modal" id="modal-visor">
+    <div class="barra-visor">
+      <span id="visor-titulo" style="color: var(--oro-brillante); letter-spacing: 1px;"></span>
+      <button class="cerrar-btn" onclick="cerrarVisor()">✕ Cerrar Lectura</button>
+    </div>
+    <div class="iframe-contenedor">
+      <div class="pantalla-carga-visor" id="pantalla-carga">
+        <div class="runa-spinner"></div>
+        <div class="texto-carga">Invocando grimorio...</div>
+      </div>
+      <iframe id="visor-iframe" src="" allow="autoplay"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let catalogoGlobal = [];
+    let libroSeleccionado = null;
+
+    const libreroContenedor = document.getElementById('librero-contenedor');
+    const modalDetalle = document.getElementById('modal-detalle');
+    const modalVisor = document.getElementById('modal-visor');
+    const visorIframe = document.getElementById('visor-iframe');
+    const pantallaCarga = document.getElementById('pantalla-carga');
+    const placaActual = document.getElementById('placa-actual');
+    const btnDescargarLibro = document.getElementById('btn-descargar-libro');
+
+    function extraerIdDrive(url) {
+      if (!url) return '';
+      const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      return match ? match[1] : '';
+    }
+
+    function obtenerEnlacePreviewDrive(urlOriginal) {
+      const fileId = extraerIdDrive(urlOriginal);
+      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : urlOriginal;
+    }
+
+    function obtenerEnlaceDescargaDirecta(urlOriginal) {
+      const fileId = extraerIdDrive(urlOriginal);
+      return fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : urlOriginal;
+    }
+
+    fetch('./libros.json')
+      .then(res => res.json())
+      .then(datos => {
+        catalogoGlobal = datos;
+        dibujarEstanterias(catalogoGlobal);
+      })
+      .catch(err => {
+        libreroContenedor.innerHTML = '<p style="text-align:center; padding: 20px;">No se pudo cargar libros.json.</p>';
+      });
+
+    function dibujarEstanterias(libros) {
+      libreroContenedor.innerHTML = '';
+      if (!libros.length) {
+        libreroContenedor.innerHTML = '<p style="text-align:center; padding: 20px;">No hay obras en esta sección.</p>';
+        return;
+      }
+
+      const sagas = {};
+      libros.forEach(libro => {
+        if (!sagas[libro.saga]) sagas[libro.saga] = [];
+        sagas[libro.saga].push(libro);
+      });
+
+      Object.keys(sagas).forEach(nombreSaga => {
+        const bloque = document.createElement('div');
+        bloque.className = 'saga-bloque';
+
+        const rotulo = document.createElement('div');
+        rotulo.className = 'rotulo-saga';
+        rotulo.innerHTML = `<div class="saga-adorno-izq"></div><div class="titulo-saga">${nombreSaga}</div>`;
+        bloque.appendChild(rotulo);
+
+        const estante = document.createElement('div');
+        estante.className = 'estante-libros';
+
+        sagas[nombreSaga].sort((a, b) => {
+          if (a.tomo !== null && b.tomo !== null) return a.tomo - b.tomo;
+          return a.titulo.localeCompare(b.titulo);
+        });
+
+        sagas[nombreSaga].forEach(libro => {
+          const caja = document.createElement('div');
+          caja.className = 'libro-portada-caja';
+          const identificador = libro.tomo !== null ? `Tomo ${libro.tomo}` : (libro.autor || '');
+
+          let contenido = '';
+          if (libro.rutaPortada) {
+            contenido = `<div class="tapa-libro"><img class="imagen-cubierta" src="${libro.rutaPortada}" alt="${libro.titulo}" loading="lazy"></div>`;
+          } else {
+            contenido = `<div class="tapa-libro"><div class="cubierta-decorativa"><div class="cubierta-titulo">${libro.titulo}</div></div></div>`;
+          }
+
+          caja.innerHTML = `${contenido}<div class="etiqueta-libro">${identificador}</div>`;
+          caja.addEventListener('click', () => abrirDetalle(libro));
+          estante.appendChild(caja);
+        });
+
+        bloque.appendChild(estante);
+        const tabla = document.createElement('div');
+        tabla.className = 'tabla-madera';
+        bloque.appendChild(tabla);
+        libreroContenedor.appendChild(bloque);
+      });
+    }
+
+    function abrirDetalle(libro) {
+      libroSeleccionado = libro;
+      document.getElementById('detalle-titulo').textContent = libro.titulo;
+      document.getElementById('detalle-saga').textContent = libro.saga;
+      document.getElementById('detalle-autor').textContent = libro.autor || 'Desconocido';
+      document.getElementById('detalle-tomo').textContent = libro.tomo !== null ? libro.tomo : 'Único';
+      document.getElementById('detalle-portada').src = libro.rutaPortada || '';
+      btnDescargarLibro.href = obtenerEnlaceDescargaDirecta(libro.rutaPdf);
+      modalDetalle.classList.add('activo');
+
+      const urlPreview = obtenerEnlacePreviewDrive(libro.rutaPdf);
+      if (visorIframe.src !== urlPreview) {
+        pantallaCarga.classList.remove('oculto');
+        visorIframe.src = urlPreview;
+      }
+    }
+
+    function cerrarDetalle() { modalDetalle.classList.remove('activo'); }
+
+    visorIframe.addEventListener('load', () => {
+      setTimeout(() => {
+        pantallaCarga.classList.add('oculto');
+      }, 300);
+    });
+
+    document.getElementById('btn-iniciar-lectura').addEventListener('click', () => {
+      if (!libroSeleccionado) return;
+      cerrarDetalle();
+      document.getElementById('visor-titulo').textContent = `${libroSeleccionado.saga} - ${libroSeleccionado.titulo}`;
+      modalVisor.classList.add('activo');
+    });
+
+    function cerrarVisor() {
+      modalVisor.classList.remove('activo');
+      visorIframe.src = '';
+      pantallaCarga.classList.remove('oculto');
+      libroSeleccionado = null;
+    }
+
+    document.getElementById('menu-categorias').addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('activo'));
+      e.target.classList.add('activo');
+      const cat = e.target.getAttribute('data-cat');
+      placaActual.textContent = cat === 'TODOS' ? 'BIBLIOTECA • ARCHIVO MATEMÁTICO' : `SALA • ${cat.toUpperCase()}`;
+      dibujarEstanterias(cat === 'TODOS' ? catalogoGlobal : catalogoGlobal.filter(l => l.categoria === cat));
+    });
+  </script>
+</body>
+</html>
