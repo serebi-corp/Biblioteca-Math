@@ -85,10 +85,43 @@
       padding: 35px 25px;
       box-shadow: inset 0 0 80px rgba(0,0,0,0.95), 0 15px 40px rgba(0,0,0,0.9);
     }
-    .saga-bloque { display: flex; flex-direction: column; }
-    .rotulo-saga { align-self: flex-start; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
-    .saga-adorno-izq { width: 30px; height: 2px; background: linear-gradient(90deg, transparent, var(--oro-medio)); }
-    .titulo-saga { font-size: 1.2rem; color: var(--oro-brillante); letter-spacing: 3px; text-transform: uppercase; }
+    .bloque-categoria {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .encabezado-categoria {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 2px solid var(--oro-medio);
+      padding-bottom: 6px;
+      margin-top: 10px;
+    }
+    .titulo-categoria-gran {
+      font-size: 1.35rem;
+      color: var(--oro-brillante);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-shadow: 0 2px 4px #000;
+    }
+    .rotulo-saga {
+      align-self: flex-start;
+      margin-top: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .saga-adorno-izq { width: 22px; height: 2px; background: linear-gradient(90deg, transparent, var(--oro-medio)); }
+    .titulo-saga {
+      font-size: 1rem;
+      color: #dfba73;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
     .estante-libros {
       display: flex;
       align-items: flex-end;
@@ -142,7 +175,15 @@
       font-size: 0.85rem; color: var(--oro-brillante); font-weight: 700;
       display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .etiqueta-libro { margin-top: 6px; font-size: 0.72rem; color: #c4a482; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .etiqueta-libro {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: #c4a482;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* Modal Detalle */
     .modal {
@@ -342,6 +383,7 @@
         libreroContenedor.innerHTML = '<p style="text-align:center; padding: 20px;">No se pudo cargar libros.json.</p>';
       });
 
+    // DIBUJA PRIMERO POR CATEGORÍA Y LUEGO POR ESTANTES
     function dibujarEstanterias(libros) {
       libreroContenedor.innerHTML = '';
       if (!libros.length) {
@@ -349,51 +391,76 @@
         return;
       }
 
-      const sagas = {};
+      // 1. Agrupar libros por Categoría principal
+      const porCategoria = {};
       libros.forEach(libro => {
-        if (!sagas[libro.saga]) sagas[libro.saga] = [];
-        sagas[libro.saga].push(libro);
+        const cat = libro.categoria || 'Varios';
+        if (!porCategoria[cat]) porCategoria[cat] = {};
+
+        const saga = libro.saga || 'General';
+        if (!porCategoria[cat][saga]) porCategoria[cat][saga] = [];
+        porCategoria[cat][saga].push(libro);
       });
 
-      Object.keys(sagas).forEach(nombreSaga => {
-        const bloque = document.createElement('div');
-        bloque.className = 'saga-bloque';
+      // 2. Ordenar las categorías alfabéticamente
+      const nombresCategorias = Object.keys(porCategoria).sort((a, b) => a.localeCompare(b));
 
-        const rotulo = document.createElement('div');
-        rotulo.className = 'rotulo-saga';
-        rotulo.innerHTML = `<div class="saga-adorno-izq"></div><div class="titulo-saga">${nombreSaga}</div>`;
-        bloque.appendChild(rotulo);
+      nombresCategorias.forEach(catNombre => {
+        const bloqueCategoria = document.createElement('div');
+        bloqueCategoria.className = 'bloque-categoria';
 
-        const estante = document.createElement('div');
-        estante.className = 'estante-libros';
+        // Título de la Categoría
+        const encabezado = document.createElement('div');
+        encabezado.className = 'encabezado-categoria';
+        encabezado.innerHTML = `<div class="titulo-categoria-gran">${catNombre}</div>`;
+        bloqueCategoria.appendChild(encabezado);
 
-        sagas[nombreSaga].sort((a, b) => {
-          if (a.tomo !== null && b.tomo !== null) return a.tomo - b.tomo;
-          return a.titulo.localeCompare(b.titulo);
-        });
+        // Subgrupos o sagas dentro de la categoría
+        const sagasDeCategoria = porCategoria[catNombre];
+        const nombresSagas = Object.keys(sagasDeCategoria).sort((a, b) => a.localeCompare(b));
 
-        sagas[nombreSaga].forEach(libro => {
-          const caja = document.createElement('div');
-          caja.className = 'libro-portada-caja';
-          const identificador = libro.tomo !== null ? `Tomo ${libro.tomo}` : (libro.autor || '');
-
-          let contenido = '';
-          if (libro.rutaPortada) {
-            contenido = `<div class="tapa-libro"><img class="imagen-cubierta" src="${libro.rutaPortada}" alt="${libro.titulo}" loading="lazy"></div>`;
-          } else {
-            contenido = `<div class="tapa-libro"><div class="cubierta-decorativa"><div class="cubierta-titulo">${libro.titulo}</div></div></div>`;
+        nombresSagas.forEach(nombreSaga => {
+          // Si tiene un nombre específico de saga que no sea "General", mostrar rótulo menor
+          if (nombreSaga !== 'General' && nombreSaga !== catNombre) {
+            const rotuloSaga = document.createElement('div');
+            rotuloSaga.className = 'rotulo-saga';
+            rotuloSaga.innerHTML = `<div class="saga-adorno-izq"></div><div class="titulo-saga">${nombreSaga}</div>`;
+            bloqueCategoria.appendChild(rotuloSaga);
           }
 
-          caja.innerHTML = `${contenido}<div class="etiqueta-libro">${identificador}</div>`;
-          caja.addEventListener('click', () => abrirDetalle(libro));
-          estante.appendChild(caja);
+          const estante = document.createElement('div');
+          estante.className = 'estante-libros';
+
+          sagasDeCategoria[nombreSaga].sort((a, b) => {
+            if (a.tomo !== null && b.tomo !== null) return a.tomo - b.tomo;
+            return a.titulo.localeCompare(b.titulo);
+          });
+
+          sagasDeCategoria[nombreSaga].forEach(libro => {
+            const caja = document.createElement('div');
+            caja.className = 'libro-portada-caja';
+            const identificador = libro.tomo !== null ? `Tomo ${libro.tomo}` : (libro.autor !== 'Desconocido' ? libro.autor : '');
+
+            let contenido = '';
+            if (libro.rutaPortada) {
+              contenido = `<div class="tapa-libro"><img class="imagen-cubierta" src="${libro.rutaPortada}" alt="${libro.titulo}" loading="lazy"></div>`;
+            } else {
+              contenido = `<div class="tapa-libro"><div class="cubierta-decorativa"><div class="cubierta-titulo">${libro.titulo}</div></div></div>`;
+            }
+
+            caja.innerHTML = `${contenido}<div class="etiqueta-libro">${identificador}</div>`;
+            caja.addEventListener('click', () => abrirDetalle(libro));
+            estante.appendChild(caja);
+          });
+
+          bloqueCategoria.appendChild(estante);
+
+          const tabla = document.createElement('div');
+          tabla.className = 'tabla-madera';
+          bloqueCategoria.appendChild(tabla);
         });
 
-        bloque.appendChild(estante);
-        const tabla = document.createElement('div');
-        tabla.className = 'tabla-madera';
-        bloque.appendChild(tabla);
-        libreroContenedor.appendChild(bloque);
+        libreroContenedor.appendChild(bloqueCategoria);
       });
     }
 
